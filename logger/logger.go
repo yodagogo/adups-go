@@ -12,6 +12,9 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+//Logger xx
+type Logger *zap.SugaredLogger
+
 //Config logger config
 type Config struct {
 	Env         string //运行环境
@@ -22,6 +25,7 @@ type Config struct {
 	Level       string //日志基本
 	Format      string //日志格式json,file
 	Mode        string //1:detail(默认打印完整的log格式),2:data(仅打印数据部分)
+	log         *zap.SugaredLogger
 }
 
 var levelMap = map[string]zapcore.Level{
@@ -33,8 +37,8 @@ var levelMap = map[string]zapcore.Level{
 	"panic":   zapcore.PanicLevel,
 }
 
-//BuildLogger 初始化logger
-func (lg *Config) BuildLogger() *zap.Logger {
+//BuildConfig 初始化logger
+func (lg *Config) BuildConfig() Logger {
 	var logger *zap.Logger
 	if len(lg.LogPath) == 0 {
 		lg.LogPath = "logs"
@@ -113,8 +117,8 @@ func (lg *Config) BuildLogger() *zap.Logger {
 	if len(lg.ServiceName) != 0 {
 		logger = zap.New(core, zap.AddCaller(), zap.Fields(zap.String("serviceName", lg.ServiceName)))
 	}
-
-	return logger
+	lg.log = logger.Sugar()
+	return logger.Sugar()
 }
 
 func timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
