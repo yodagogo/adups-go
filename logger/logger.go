@@ -44,7 +44,7 @@ var levelMap = map[string]zapcore.Level{
 }
 
 //BuildConfig 初始化logger
-func (lg *Config) BuildConfig() (Logger, Sugger) {
+func (lg *Config) BuildConfig() (*zap.Logger, *zap.SugaredLogger) {
 
 	if len(lg.LogPath) == 0 {
 		lg.LogPath = "logs"
