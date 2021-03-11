@@ -13,7 +13,11 @@ import (
 )
 
 //Logger xx
-type Logger *zap.SugaredLogger
+// type Logger *zap.SugaredLogger
+type Logger *zap.Logger
+
+//Sugger zap SugaredLogger
+type Sugger *zap.SugaredLogger
 
 //Config logger config
 type Config struct {
@@ -25,7 +29,9 @@ type Config struct {
 	Level       string //日志基本
 	Format      string //日志格式json,file
 	Mode        string //1:detail(默认打印完整的log格式),2:data(仅打印数据部分)
-	log         *zap.SugaredLogger
+	// log         *zap.SugaredLogger
+	log    *zap.Logger
+	sugger *zap.SugaredLogger
 }
 
 var levelMap = map[string]zapcore.Level{
@@ -38,8 +44,8 @@ var levelMap = map[string]zapcore.Level{
 }
 
 //BuildConfig 初始化logger
-func (lg *Config) BuildConfig() Logger {
-	var logger *zap.Logger
+func (lg *Config) BuildConfig() (Logger, Sugger) {
+
 	if len(lg.LogPath) == 0 {
 		lg.LogPath = "logs"
 	}
@@ -112,13 +118,15 @@ func (lg *Config) BuildConfig() Logger {
 		)
 	}
 
-	logger = zap.New(core, zap.AddCaller())
+	lger := zap.New(core, zap.AddCaller())
 
 	if len(lg.ServiceName) != 0 {
-		logger = zap.New(core, zap.AddCaller(), zap.Fields(zap.String("serviceName", lg.ServiceName)))
+		lger = zap.New(core, zap.AddCaller(), zap.Fields(zap.String("serviceName", lg.ServiceName)))
 	}
-	lg.log = logger.Sugar()
-	return logger.Sugar()
+
+	lg.log = lger
+	lg.sugger = lger.Sugar()
+	return lg.log, lg.sugger
 }
 
 func timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
